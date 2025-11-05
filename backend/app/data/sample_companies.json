@@ -1,0 +1,32 @@
+[
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "sector": "Technology",
+    "industry": "Consumer Electronics",
+    "marketCap": 2800000000000,
+    "description": "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.",
+    "esgScore": 78,
+    "headquarters": "Cupertino, California, United States"
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "sector": "Technology",
+    "industry": "Software—Infrastructure",
+    "marketCap": 2700000000000,
+    "description": "Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide.",
+    "esgScore": 82,
+    "headquarters": "Redmond, Washington, United States"
+  },
+  {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "sector": "Communication Services",
+    "industry": "Internet Content & Information",
+    "marketCap": 1800000000000,
+    "description": "Alphabet Inc. provides various products and platforms including Google Services, Google Cloud, and Other Bets.",
+    "esgScore": 75,
+    "headquarters": "Mountain View, California, United States"
+  }
+]

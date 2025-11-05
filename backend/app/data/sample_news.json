@@ -1,0 +1,40 @@
+{
+  "AAPL": [
+    {
+      "title": "Apple Unveils Next-Gen M-Series Chips",
+      "source": "Bloomberg",
+      "publishedAt": "2023-11-06T12:00:00Z",
+      "summary": "Apple's latest silicon delivers improved efficiency and AI acceleration.",
+      "sentiment": 0.72,
+      "videoUrl": "https://www.youtube.com/embed/sample1"
+    },
+    {
+      "title": "Regulators Scrutinize App Store Policies",
+      "source": "Reuters",
+      "publishedAt": "2023-11-05T09:30:00Z",
+      "summary": "Global regulators are coordinating to evaluate the competitive impact of Apple's store fees.",
+      "sentiment": -0.18,
+      "videoUrl": "https://www.youtube.com/embed/sample2"
+    }
+  ],
+  "MSFT": [
+    {
+      "title": "Microsoft Expands Azure AI Services",
+      "source": "CNBC",
+      "publishedAt": "2023-11-06T14:45:00Z",
+      "summary": "New cloud regions focus on low-latency inference for enterprise customers.",
+      "sentiment": 0.65,
+      "videoUrl": "https://www.youtube.com/embed/sample3"
+    }
+  ],
+  "GOOGL": [
+    {
+      "title": "Alphabet Deepens Investments in Quantum Computing",
+      "source": "Financial Times",
+      "publishedAt": "2023-11-04T07:00:00Z",
+      "summary": "The company is racing to achieve quantum advantage in practical workloads.",
+      "sentiment": 0.48,
+      "videoUrl": "https://www.youtube.com/embed/sample4"
+    }
+  ]
+}
