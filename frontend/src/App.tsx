@@ -10,11 +10,12 @@ import { ChartPanel } from './components/ChartPanel';
 import { FinancialPanel } from './components/FinancialPanel';
 import { InsightsPanel } from './components/InsightsPanel';
 import { NewsPanel } from './components/NewsPanel';
+import { VideoPanel } from './components/VideoPanel';
 import { ComparisonPanel } from './components/ComparisonPanel';
 import { AIAnalyst } from './components/AIAnalyst';
 import { useWatchlist } from './hooks/useWatchlist';
 import { api } from './services/api';
-import { InsightsResponse } from './types';
+import { InsightsResponse, VideosResponse } from './types';
 
 function App() {
   const [symbol, setSymbol] = useState('AAPL');
@@ -35,6 +36,11 @@ function App() {
   const newsQuery = useQuery({
     queryKey: ['news', symbol],
     queryFn: () => api.getNews(symbol),
+  });
+
+  const videoQuery = useQuery<VideosResponse>({
+    queryKey: ['videos', symbol],
+    queryFn: () => api.getVideos(symbol),
   });
 
   const insightsQuery = useQuery<InsightsResponse>({
@@ -92,6 +98,7 @@ function App() {
             <FinancialPanel data={financialsQuery.data} loading={financialsQuery.isLoading} />
             <InsightsPanel data={insightsQuery.data} loading={insightsQuery.isLoading} />
             <NewsPanel data={newsQuery.data} loading={newsQuery.isLoading} />
+            <VideoPanel data={videoQuery.data} loading={videoQuery.isLoading} />
             <ComparisonPanel
               data={comparisonQuery.data}
               loading={comparisonQuery.isLoading}

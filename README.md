@@ -1,12 +1,12 @@
 # Aurora Financial Intelligence Terminal
 
-Aurora is a full-stack, browser-based finance platform inspired by institutional terminals. It combines a FastAPI backend with a React + Vite front-end, aggregates live market data from Yahoo Finance, Alpha Vantage, and SEC EDGAR, surfaces real-time news via Finnhub/NewsData, and layers in AI commentary through OpenAI or an offline summarizer. The result is a modular, data-dense workspace that delivers market intelligence, charting, filings, and media without leaving the browser.
+Aurora is a full-stack, browser-based finance platform inspired by institutional terminals. It combines a FastAPI backend with a React + Vite front-end, aggregates live market data from Yahoo Finance, Alpha Vantage, Financial Modeling Prep, and SEC EDGAR, surfaces real-time news via Finnhub/NewsData, injects market video briefings from YouTube, and layers in AI commentary through OpenAI or an offline summarizer. The result is a modular, data-dense workspace that delivers market intelligence, charting, filings, and media without leaving the browser.
 
 ## Feature Highlights
 
 - **Search Intelligence** – Natural ticker/company search powered by Yahoo Finance with persistent recent history and watchlists stored locally.
-- **Live Market Data** – Company financials, key ratios, SEC filings, and multi-range price history pulled dynamically via `yfinance` and Alpha Vantage technical indicators (MACD, RSI, Bollinger Bands, FX, crypto).
-- **News & Media Hub** – Aggregated real-time articles and embedded video playback from Finnhub, NewsData.io, or Yahoo Finance feeds.
+- **Live Market Data** – Company profiles, fundamental statements, key ratios, SEC filings, and multi-range price history pulled dynamically via `yfinance`, Financial Modeling Prep, and Alpha Vantage technical indicators (MACD, RSI, Bollinger Bands, FX, crypto).
+- **News & Media Hub** – Aggregated real-time articles plus embedded video playback from Finnhub, NewsData.io, Yahoo Finance feeds, and curated YouTube finance channels.
 - **Quant & AI Insights** – Automated highlights, technical outlooks, peer correlations, and an “AI Market Analyst” panel that can call OpenAI (if configured) for narrative summaries.
 - **Interactive Visualization** – Tailwind/ShadCN-styled dashboard with Recharts-based price and indicator visualizations, financial statement tables, and comparison analytics.
 - **Production-ready Infrastructure** – FastAPI caching via `fastapi-cache2`, optional OpenAI integration, static asset serving, Docker build, and environment-variable driven configuration.
@@ -50,7 +50,9 @@ cp .env.example .env
 | Variable | Description |
 | --- | --- |
 | `ALPHA_VANTAGE_API_KEY` | Required for technical indicators, FX, and crypto data (`demo` key has strict limits). |
+| `FMP_API_KEY` | Required for live financial statements, company profiles, and ratios (use `demo` for limited access). |
 | `FINNHUB_API_KEY` / `NEWSDATA_API_KEY` | Optional real-time company news feeds (fallback to Yahoo Finance if omitted). |
+| `YOUTUBE_API_KEY` | Optional. Powers the market video briefings and `/api/videos` endpoint. |
 | `OPENAI_API_KEY` | Optional. Enables the `/api/analyze` endpoint for GPT-powered commentary. |
 | `CORS_ORIGINS` | Comma-separated list of allowed origins for the API. |
 | `SEC_USER_AGENT` | Contact email for SEC EDGAR requests. |
@@ -123,6 +125,7 @@ docker run --env-file .env -p 8000:8000 aurora-terminal
 | `GET /api/financials/{symbol}` | Company profile, key metrics, financial statements, SEC filings. |
 | `GET /api/chart/{symbol}?range=1y` | Price history with MACD/RSI/Bollinger indicators. |
 | `GET /api/news/{symbol}` | Aggregated news headlines and media. |
+| `GET /api/videos/{query}` | Latest finance-focused YouTube clips for the requested symbol or keyword. |
 | `GET /api/insights/{symbol}` | Generated highlights, narratives, and technical outlook. |
 | `POST /api/compare` | Peer comparison metrics and correlations. |
 | `POST /api/analyze` | AI-generated narrative (OpenAI or offline fallback). |

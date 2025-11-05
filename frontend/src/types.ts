@@ -72,6 +72,22 @@ export interface NewsResponse {
   items: NewsItem[];
 }
 
+export interface VideoItem {
+  id: string;
+  title: string;
+  url: string;
+  videoUrl: string;
+  channel?: string;
+  description?: string;
+  publishedAt: string;
+  thumbnail?: string;
+}
+
+export interface VideosResponse {
+  query: string;
+  items: VideoItem[];
+}
+
 export interface InsightsResponse {
   symbol: string;
   highlights: string[];

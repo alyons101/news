@@ -11,6 +11,7 @@ import yfinance as yf
 from ..core.config import settings
 
 ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
+FMP_BASE_URL = "https://financialmodelingprep.com/api/v3"
 
 
 async def _run_in_thread(func, *args, **kwargs):
@@ -18,9 +19,34 @@ async def _run_in_thread(func, *args, **kwargs):
 
 
 async def get_company_profile(symbol: str) -> Dict[str, Any]:
+    profile: Dict[str, Any] | None = None
+    try:
+        fmp_profile = await _fmp_request(f"profile/{symbol}")
+        if fmp_profile:
+            entry = fmp_profile[0]
+            profile = {
+                "symbol": symbol.upper(),
+                "name": entry.get("companyName") or entry.get("symbol", symbol.upper()),
+                "currency": entry.get("currency"),
+                "exchange": entry.get("exchangeShortName") or entry.get("exchange"),
+                "sector": entry.get("sector"),
+                "industry": entry.get("industry"),
+                "marketCap": entry.get("mktCap"),
+                "website": entry.get("website"),
+                "country": entry.get("country"),
+                "description": entry.get("description"),
+                "cik": entry.get("cik"),
+                "logo": entry.get("image"),
+            }
+    except Exception:
+        profile = None
+
+    if profile is not None:
+        return profile
+
     ticker = await _run_in_thread(yf.Ticker, symbol)
     info = await _run_in_thread(lambda: ticker.info)
-    profile = {
+    return {
         "symbol": symbol.upper(),
         "name": info.get("longName") or info.get("shortName") or symbol.upper(),
         "currency": info.get("currency"),
@@ -34,15 +60,11 @@ async def get_company_profile(symbol: str) -> Dict[str, Any]:
         "cik": info.get("cik"),
         "logo": info.get("logo_url"),
     }
-    return profile
 
 
 async def get_key_metrics(symbol: str) -> List[Dict[str, Any]]:
-    ticker = await _run_in_thread(yf.Ticker, symbol)
-    info = await _run_in_thread(lambda: ticker.info)
-
     def format_currency(value: Any) -> str:
-        if value is None:
+        if value in (None, ""):
             return "-"
         if isinstance(value, (int, float)):
             if abs(value) >= 1_000_000_000:
@@ -52,28 +74,93 @@ async def get_key_metrics(symbol: str) -> List[Dict[str, Any]]:
             return f"${value:,.2f}"
         return str(value)
 
-    metrics = [
-        {"label": "Market Cap", "value": format_currency(info.get("marketCap"))},
-        {"label": "P/E", "value": f"{info.get('trailingPE', 0):.2f}" if info.get("trailingPE") else "-"},
-        {"label": "EPS", "value": f"{info.get('trailingEps', 0):.2f}" if info.get("trailingEps") else "-"},
-        {
-            "label": "Revenue",
-            "value": format_currency(info.get("totalRevenue")),
-            "hint": "Trailing twelve months",
-        },
-        {
-            "label": "Profit Margin",
-            "value": f"{info.get('profitMargins', 0) * 100:.2f}%" if info.get("profitMargins") else "-",
-        },
-        {
-            "label": "52W Range",
-            "value": f"{info.get('fiftyTwoWeekLow', '-')}-{info.get('fiftyTwoWeekHigh', '-')}",
-        },
-    ]
+    def format_number(value: Any, decimals: int = 2, suffix: str = "") -> str:
+        if value in (None, ""):
+            return "-"
+        try:
+            return f"{float(value):.{decimals}f}{suffix}"
+        except (TypeError, ValueError):
+            return "-"
+
+    def format_percent(value: Any) -> str:
+        if value in (None, ""):
+            return "-"
+        try:
+            return f"{float(value) * 100:.2f}%"
+        except (TypeError, ValueError):
+            return "-"
+
+    metrics: List[Dict[str, Any]] = []
+    key_metrics: Dict[str, Any] | None = None
+    ratios: Dict[str, Any] | None = None
+
+    try:
+        key_metrics_payload = await _fmp_request(f"key-metrics-ttm/{symbol}")
+        if key_metrics_payload:
+            key_metrics = key_metrics_payload[0]
+    except Exception:
+        key_metrics = None
+
+    try:
+        ratios_payload = await _fmp_request(f"ratios-ttm/{symbol}")
+        if ratios_payload:
+            ratios = ratios_payload[0]
+    except Exception:
+        ratios = None
+
+    if key_metrics:
+        metrics.append({"label": "Market Cap", "value": format_currency(key_metrics.get("marketCapTTM"))})
+        metrics.append({"label": "Enterprise Value", "value": format_currency(key_metrics.get("enterpriseValueTTM"))})
+        metrics.append({"label": "P/E", "value": format_number(key_metrics.get("peRatioTTM"))})
+        metrics.append({"label": "EPS (TTM)", "value": format_number(key_metrics.get("epsTTM"))})
+        metrics.append({"label": "Free Cash Flow", "value": format_currency(key_metrics.get("freeCashFlowTTM"))})
+
+    if ratios:
+        metrics.append({"label": "Revenue Growth (TTM)", "value": format_percent(ratios.get("revenueGrowthTTM"))})
+        metrics.append({"label": "Net Profit Margin", "value": format_percent(ratios.get("netProfitMarginTTM"))})
+        metrics.append({"label": "Return on Equity", "value": format_percent(ratios.get("roeTTM"))})
+        metrics.append({"label": "Debt to Equity", "value": format_number(ratios.get("debtEquityRatioTTM"))})
+
+    if not metrics:
+        ticker = await _run_in_thread(yf.Ticker, symbol)
+        info = await _run_in_thread(lambda: ticker.info)
+        metrics = [
+            {"label": "Market Cap", "value": format_currency(info.get("marketCap"))},
+            {"label": "P/E", "value": format_number(info.get("trailingPE"))},
+            {"label": "EPS", "value": format_number(info.get("trailingEps"))},
+            {
+                "label": "Revenue",
+                "value": format_currency(info.get("totalRevenue")),
+                "hint": "Trailing twelve months",
+            },
+            {"label": "Profit Margin", "value": format_percent(info.get("profitMargins"))},
+        ]
+    else:
+        try:
+            ticker = await _run_in_thread(yf.Ticker, symbol)
+            info = await _run_in_thread(lambda: ticker.info)
+            low = format_number(info.get("fiftyTwoWeekLow"))
+            high = format_number(info.get("fiftyTwoWeekHigh"))
+            if low != "-" or high != "-":
+                metrics.append({"label": "52W Range", "value": f"{low}-{high}"})
+        except Exception:
+            pass
+
     return metrics
 
 
-async def _statement_to_payload(frame: pd.DataFrame) -> List[Dict[str, Any]]:
+async def _fmp_request(path: str, params: Dict[str, Any] | None = None) -> Any:
+    params_with_key = {**(params or {}), "apikey": settings.fmp_api_key or "demo"}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(f"{FMP_BASE_URL}/{path.lstrip('/')}", params=params_with_key)
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, dict) and any(key in data for key in ("error", "Error Message")):
+            raise ValueError(data.get("error") or data.get("Error Message"))
+        return data
+
+
+async def _statement_to_payload(frame: pd.DataFrame | None) -> List[Dict[str, Any]]:
     if frame is None or frame.empty:
         return []
     frame = frame.fillna(0)
@@ -84,17 +171,51 @@ async def _statement_to_payload(frame: pd.DataFrame) -> List[Dict[str, Any]]:
     return payload
 
 
-async def get_financial_statements(symbol: str) -> Dict[str, List[Dict[str, Any]]]:
-    ticker = await _run_in_thread(yf.Ticker, symbol)
-    income = await _run_in_thread(lambda: getattr(ticker, "income_stmt", ticker.financials))
-    balance = await _run_in_thread(lambda: getattr(ticker, "balance_sheet", ticker.balance_sheet))
-    cashflow = await _run_in_thread(lambda: getattr(ticker, "cashflow", ticker.cashflow))
+def _fmp_statement_payload(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    payload: List[Dict[str, Any]] = []
+    for record in records:
+        period = record.get("date") or record.get("calendarYear")
+        data: Dict[str, float] = {}
+        for key, value in record.items():
+            if key in {
+                "date",
+                "symbol",
+                "reportedCurrency",
+                "cik",
+                "fillingDate",
+                "acceptedDate",
+                "calendarYear",
+                "period",
+                "link",
+                "finalLink",
+            }:
+                continue
+            if isinstance(value, (int, float)):
+                data[key] = float(value)
+        payload.append({"period": str(period), "data": data})
+    return payload
 
-    return {
-        "income": await _statement_to_payload(income),
-        "balance": await _statement_to_payload(balance),
-        "cashflow": await _statement_to_payload(cashflow),
-    }
+
+async def get_financial_statements(symbol: str) -> Dict[str, List[Dict[str, Any]]]:
+    try:
+        income = await _fmp_request(f"income-statement/{symbol}", {"limit": 6})
+        balance = await _fmp_request(f"balance-sheet-statement/{symbol}", {"limit": 6})
+        cashflow = await _fmp_request(f"cash-flow-statement/{symbol}", {"limit": 6})
+        return {
+            "income": _fmp_statement_payload(income),
+            "balance": _fmp_statement_payload(balance),
+            "cashflow": _fmp_statement_payload(cashflow),
+        }
+    except Exception:
+        ticker = await _run_in_thread(yf.Ticker, symbol)
+        income_frame = await _run_in_thread(lambda: getattr(ticker, "income_stmt", ticker.financials))
+        balance_frame = await _run_in_thread(lambda: getattr(ticker, "balance_sheet", ticker.balance_sheet))
+        cashflow_frame = await _run_in_thread(lambda: getattr(ticker, "cashflow", ticker.cashflow))
+        return {
+            "income": await _statement_to_payload(income_frame),
+            "balance": await _statement_to_payload(balance_frame),
+            "cashflow": await _statement_to_payload(cashflow_frame),
+        }
 
 
 async def get_price_history(symbol: str, range_: str = "1y", interval: str = "1d") -> List[Dict[str, Any]]:

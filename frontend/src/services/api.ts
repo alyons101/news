@@ -28,6 +28,7 @@ export const api = {
     return request(`/chart/${symbol}${query ? `?${query}` : ''}`);
   },
   getNews: (symbol: string) => request(`/news/${symbol}`),
+  getVideos: (query: string) => request(`/videos/${encodeURIComponent(query)}`),
   getInsights: (symbol: string) => request(`/insights/${symbol}`),
   compareSymbols: (symbols: string[]) => request('/compare', 'POST', { symbols }),
   analyzeSymbol: (payload: { symbol: string; question?: string; context?: any }) =>

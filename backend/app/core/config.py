@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     alpha_vantage_api_key: str | None = None
     finnhub_api_key: str | None = None
     newsdata_api_key: str | None = None
+    fmp_api_key: str | None = None
+    youtube_api_key: str | None = None
     openai_api_key: str | None = None
     yahoo_region: str = "US"
     cors_origins: List[str] = Field(default_factory=lambda: ["*"])

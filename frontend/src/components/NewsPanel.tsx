@@ -47,7 +47,7 @@ export function NewsPanel({ data, loading }: NewsPanelProps) {
         <div className="space-y-3">
           {secondary.map((item) => (
             <a
-              key={item.title}
+              key={item.url}
               href={item.url}
               target="_blank"
               rel="noreferrer"

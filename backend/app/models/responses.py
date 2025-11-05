@@ -91,6 +91,22 @@ class NewsResponse(BaseModel):
     items: List[NewsItem]
 
 
+class VideoItem(BaseModel):
+    id: str
+    title: str
+    url: HttpUrl
+    videoUrl: HttpUrl
+    channel: Optional[str] = None
+    description: Optional[str] = None
+    publishedAt: datetime
+    thumbnail: Optional[HttpUrl] = None
+
+
+class VideosResponse(BaseModel):
+    query: str
+    items: List[VideoItem]
+
+
 class Insight(BaseModel):
     title: str
     body: str

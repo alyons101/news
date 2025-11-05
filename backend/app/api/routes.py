@@ -17,6 +17,7 @@ from ..models.responses import (
     NewsResponse,
     PricePoint,
     SearchResult,
+    VideosResponse,
 )
 from ..services import analyzer, insights, market, news, search
 
@@ -79,6 +80,13 @@ async def get_chart(
 async def get_company_news(symbol: str) -> NewsResponse:
     items = await news.get_news(symbol)
     return NewsResponse(symbol=symbol.upper(), items=items)
+
+
+@router.get("/videos/{query}", response_model=VideosResponse)
+@cache(expire=300)
+async def get_videos(query: str) -> VideosResponse:
+    items = await news.get_videos(query)
+    return VideosResponse(query=query.upper(), items=items)
 
 
 @router.get("/insights/{symbol}", response_model=InsightsResponse)
