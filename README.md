@@ -37,6 +37,23 @@ Aurora is a concept-stage, browser-based financial intelligence terminal that de
 
 ## Getting Started
 
+### One-command local launch
+
+The repository ships with a helper script that prepares the Python virtual environment, installs Node dependencies, and boots
+both services with hot reloading.
+
+```bash
+./scripts/dev.sh
+```
+
+The backend will be available at <http://localhost:8000> and the frontend at <http://localhost:5173>. The Vite dev server
+proxies `/api` requests to the FastAPI backend automatically, so you can interact with the Aurora terminal in your browser once
+the script prints the startup URLs.
+
+### Manual setup
+
+If you prefer to run each service independently:
+
 1. **Backend**
    ```bash
    cd backend
@@ -50,10 +67,11 @@ Aurora is a concept-stage, browser-based financial intelligence terminal that de
    ```bash
    cd frontend
    npm install
-   npm run dev
+   npm run dev -- --host 0.0.0.0 --port 5173
    ```
 
-The Vite dev server proxies `/api` requests to the FastAPI backend running on `localhost:8000`. Once both services are running, navigate to `http://localhost:5173` to explore the Aurora terminal.
+Visit <http://localhost:5173> after both commands are running. The development server forwards API requests to the backend
+listening on `localhost:8000`.
 
 ## Next Steps
 
