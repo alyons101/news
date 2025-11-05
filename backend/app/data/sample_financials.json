@@ -1,0 +1,44 @@
+{
+  "AAPL": {
+    "incomeStatement": [
+      {"year": 2020, "revenue": 274515, "netIncome": 57411, "eps": 3.28},
+      {"year": 2021, "revenue": 365817, "netIncome": 94680, "eps": 5.61},
+      {"year": 2022, "revenue": 394328, "netIncome": 99803, "eps": 6.11},
+      {"year": 2023, "revenue": 383285, "netIncome": 96995, "eps": 6.05}
+    ],
+    "balanceSheet": {
+      "currentRatio": 0.94,
+      "quickRatio": 0.72,
+      "debtToEquity": 1.73,
+      "returnOnEquity": 1.48
+    }
+  },
+  "MSFT": {
+    "incomeStatement": [
+      {"year": 2020, "revenue": 143015, "netIncome": 44281, "eps": 5.76},
+      {"year": 2021, "revenue": 168088, "netIncome": 61271, "eps": 8.12},
+      {"year": 2022, "revenue": 198270, "netIncome": 72738, "eps": 9.65},
+      {"year": 2023, "revenue": 211915, "netIncome": 72838, "eps": 9.68}
+    ],
+    "balanceSheet": {
+      "currentRatio": 1.78,
+      "quickRatio": 1.56,
+      "debtToEquity": 0.54,
+      "returnOnEquity": 0.47
+    }
+  },
+  "GOOGL": {
+    "incomeStatement": [
+      {"year": 2020, "revenue": 182527, "netIncome": 40269, "eps": 58.61},
+      {"year": 2021, "revenue": 257637, "netIncome": 76033, "eps": 112.20},
+      {"year": 2022, "revenue": 282836, "netIncome": 59972, "eps": 91.47},
+      {"year": 2023, "revenue": 307394, "netIncome": 73695, "eps": 117.23}
+    ],
+    "balanceSheet": {
+      "currentRatio": 2.78,
+      "quickRatio": 2.65,
+      "debtToEquity": 0.11,
+      "returnOnEquity": 0.31
+    }
+  }
+}
